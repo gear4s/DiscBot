@@ -1,0 +1,13 @@
+{
+    "ytapi": "",
+    "osuToken": "",
+    "shouldDeleteMessages": true,
+    "warframe": {
+        "baro": "https://deathsnacks.com/wf/data/voidtraders.json",
+        "syndicate": "https://deathsnacks.com/wf/data/syndicates.json",
+        "sortie": "https://deathsnacks.com/wf/data/sorties.json",
+        "alerts": "https://deathsnacks.com/wf/data/last15alerts_localized.json",
+        "icon": "https://i.imgur.com/VHxmmvD.png",
+        "emoji": "assets/emojis/warframe.png"
+    }
+}
