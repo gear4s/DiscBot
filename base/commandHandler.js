@@ -5,7 +5,7 @@ const CommandPermissions = require(`${__dirname}/commandPermissions.js`)
 con.configure({
   using: {
     log: 'base.command.log',
-    debug: 'base.command,debug',
+    debug: 'base.command.debug',
     error: 'base.command.error'
   },
   categories: {
