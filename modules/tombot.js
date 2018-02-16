@@ -2,38 +2,13 @@
 
 const Discord = require("discord.js")
 const fs = require('mz/fs');
+global.rootpath = process.cwd()
 
 class TomBot {
-  constructor() {
+  constructor(client) {
+    this.client = client
     this.name = "TomBot"
     this.mods = []
-    
-    this.con = require(`${__dirname}/../lib/consoleops.js`)
-    this.con.configure({
-      using: {
-        log: 'module.tombot.log',
-        debug: 'module.tombot.debug',
-        error: 'module.tombot.error'
-      },
-      categories: {
-        ['module.tombot.log']: {
-          appenders: ['server', 'console', 'log'],
-          level: 'trace'
-        },
-        ['module.tombot.debug']: {
-          appenders: ['server', 'console', 'debug'],
-          level: 'debug'
-        },
-        ['module.tombot.error']: {
-          appenders: ['server', 'console', 'error'],
-          level: 'error'
-        },
-        default: {
-          appenders: ['server'],
-          level: 'trace'
-        }
-      }
-    })
   }
   
   createCommandBase() {
@@ -59,23 +34,23 @@ class TomBot {
         }
 
         const mod = require(`${__dirname}/tombot/${file}`)
-        await mod.init(this.client, this.cmd, this.con)
+        const modInstance = new mod(this.client)
+        await modInstance.init(this.cmd)
         
-        this.mods.push(mod)
-        this.con.log(`-- Loaded TomBot module ${mod.name}`)
+        this.mods.push(modInstance)
+        console.log(`-- Loaded TomBot module ${modInstance.name}`)
       }
     } catch(e) {
       return e
     }
   }
   
-  async init(client) {
-    this.client = client
+  async init() {
     this.createCommandBase()
   
     const error = await this.loadModules()
     if(error) {
-      this.con.error(error)
+      console.log(error)
       return -1
     }
   }
@@ -85,4 +60,4 @@ class TomBot {
   }
 }
 
-module.exports = new TomBot()
+module.exports = TomBot

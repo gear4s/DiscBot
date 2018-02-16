@@ -1,9 +1,10 @@
 const Music = require(`${__dirname}/music/music.js`)
 const Radio = require(`${__dirname}/music/radio.js`)
+const TomBotModule = require(`${__dirname}/inc/tombotcmd.js`)
 
-class TomBotMusic {
-  constructor() {
-    this.name = "Music Operations"
+class TomBotMusic extends TomBotModule {
+  constructor(client) {
+    super(client, "Music Operations")
   }
   
   async createWebhook(channel) {
@@ -34,9 +35,7 @@ class TomBotMusic {
     this.client.on("channelCreate", this.createWebhook)
   }
   
-  async init(client, command) {
-    this.client = client
-  
+  async init(command) {
     this.setupWebhooks()
   
     const MusicLib = require(`${__dirname}/music/music.js`)
@@ -59,4 +58,4 @@ class TomBotMusic {
   }
 }
 
-module.exports = new TomBotMusic()
+module.exports = TomBotMusic

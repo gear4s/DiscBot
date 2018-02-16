@@ -2,7 +2,8 @@
 const {DB} = require(`${global.rootpath}/lib/db.js`)
 
 class React {
-  constructor() {
+  constructor(client) {
+    this.client = client
     this.db = new DB("react")
     this.globalOptions = {}
   }
@@ -33,33 +34,28 @@ class React {
   async cmdTo(info) {
     if(info.msg.mentions.size == 0) return info.msg.reply("you need to specify a user to give to")
     
-    const tempStore = {}
+    let gotten
     switch(info.args[1]) {
-      // !react reactionName | @Mention
+      // !react to reactionName | @Mention
       // Pipe instead of english
-    
       case "|": {
         if(!/<@!?\d+>/g.test(info.args[2])) return info.msg.reply("please specify a valid user")
-        
-        tempStore.gotten = this.db.get("reactions").find(row => {
-          return row.serverid == info.msg.guild.id && row.name == info.args[0]
-        })
-        if(tempStore.gotten.length == 0) return info.msg.reply("that is an invalid reaction!")
+        gotten = this.db.get("reactions").filterBy({serverid: info.msg.guild.id, name: info.args[0]})
       } break
       
       // !react to @Mention with reactionName
       // English instead of pipe
       case "with": {
         if(!/<@!?\d+>/g.test(info.args[0])) return info.msg.reply("please specify a valid user")
-        
-        tempStore.gotten = this.db.get("reactions").findBy({serverid: info.msg.guild.id, name: info.args[2]})
-        if(tempStore.gotten.length == 0) return info.msg.reply("that is an invalid reaction!")
+        gotten = this.db.get("reactions").filterBy({serverid: info.msg.guild.id, name: info.args[2]})
       } break
       
       default: return info.msg.reply("you need to specify a with or a pipe!")
     }
+
+    if(gotten.length == 0) return info.msg.reply("that is an invalid reaction!")
     
-    const g = tempStore.gotten
+    const g = gotten[0]
     const user = await this.client.fetchUser(info.msg.mentions.users.first(), false)
     await info.msg.channel.send(`${user}: ${g.description}.` + (g.resources ? `\n\n${g.resources}` : ""))
   }
@@ -96,16 +92,15 @@ class React {
   }
   
   async cmdList(info) {
-    const reactions = this.db.get("reactions").filterBy("serverid", info.msg.guild.id)
+    const reactions = this.db.get("reactions").filterBy({serverid: info.msg.guild.id, authorid: info.msg.author.id})
     
-    const embed = {title: "List of Reactions on this server", description: "T", fields: []}
+    const embed = {title: "List of your reactions on this server", fields: []}
     for(const reaction of reactions) {
       const embedField = {
         name: reaction.name,
-        value: reaction.description
+        value: reaction.description,
+        inline: true
       }
-      
-      if(reaction.resources) embedField.value += "\n\n*Resources:*\n" + reaction.resources
       
       embed.fields.push(embedField)
     }
@@ -124,15 +119,13 @@ class React {
   }
   
   async init(client) {
-    this.client = client
-    
     await this.db.init()
     
     // Load global options from database
     this.globalOptions = this.db.get("options").find(o => o.name === "globalOptions") || {
       sendReactionAs: 1,
       sendReactionFrom: 1,
-      webhookNmae: "ReactionWebhook"
+      webhookName: "ReactionWebhook"
     }
     
     this.createCommand()
@@ -163,5 +156,5 @@ class React {
   }
 }
 
-module.exports = new React()
+module.exports = React
 
